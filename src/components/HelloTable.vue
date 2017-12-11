@@ -5,7 +5,7 @@
            <span>aaa</span>           
          </td>
          <td><span>bbb</span></td>
-         <td><span @click.stop="iconClickAction">delete</span></td>
+         <td><i class="el-icon-delete" @click.stop="iconClickAction"></i></td>
        </tr>
      </table>
   </template>
