@@ -10,8 +10,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloTable',
-      component: HelloTable
+      name: 'HelloTree',
+      component: HelloTree
     }
   ]
 })
