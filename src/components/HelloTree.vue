@@ -131,12 +131,14 @@ export default {
         itemLevel1.children = []
         for (let s of p.scada) {
           let itemLevel2 = {}
+          itemLevel2.parentId = itemLevel1.id
           itemLevel2.id = itemLevel1.id + '-' + s.scadaId
           if (s.canRead) self.defaultSelectedId.push(itemLevel2.id)
           itemLevel2.label = s.scadaId
           itemLevel2.children = []
           for (let d of s.device) {
             let itemLevel3 = {}
+            itemLevel3.parentId = itemLevel2.id;
             itemLevel3.id = itemLevel2.id + '-' + d.deviceId
             if (d.canRead) self.defaultSelectedId.push(itemLevel3.id)
             itemLevel3.label = d.deviceId
@@ -151,15 +153,19 @@ export default {
       const selectedNodes = this.$refs.tree.getCheckedNodes()
       console.log(selectedNodes)
     },
-    handleCheckChange (node, checked) {
-      if (checked) this.setChildNodeChecked(node)
+    handleCheckChange (node, isChecked) {
+    if(node.children) this.setChildNodeChecked(node, isChecked)
+    if(node.parentId && isChecked) this.setParentNodeChecked(node.parentId, isChecked);
     },
-    setChildNodeChecked (node) {
+    setChildNodeChecked (node, isChecked) {
       for (const child of node.children) {
-        this.$refs.tree.setChecked(child.id, true)
-        if (child.children) this.setChildNodeChecked(child)
+        this.$refs.tree.setChecked(child, isChecked)
+        if (child.children) this.setChildNodeChecked(child, isChecked);        
       }
-    }
+    },
+    setParentNodeChecked (id, isChecked){
+      this.$refs.tree.setChecked(id, isChecked)
+    }    
   },
   beforeMount () {
     this.getManageList()
