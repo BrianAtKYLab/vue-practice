@@ -11,7 +11,7 @@ export default {
   name: "HelloTree",
   data() {
     return {
-      isTreeWalkingUp: false,
+      in: false,
       manageData: [],
       projectData: [
         {
@@ -128,14 +128,12 @@ export default {
         itemLevel1.children = [];
         for (let s of p.scada) {
           let itemLevel2 = {};
-          itemLevel2.parentId = itemLevel1.id;
           itemLevel2.id = itemLevel1.id + "-" + s.scadaId;
           if (s.canRead) self.defaultSelectedId.push(itemLevel2.id);
           itemLevel2.label = s.scadaId;
           itemLevel2.children = [];
           for (let d of s.device) {
             let itemLevel3 = {};
-            itemLevel3.parentId = itemLevel2.id;
             itemLevel3.id = itemLevel2.id + "-" + d.deviceId;
             if (d.canRead) self.defaultSelectedId.push(itemLevel3.id);
             itemLevel3.label = d.deviceId;
@@ -148,33 +146,47 @@ export default {
     },
     btnAction() {
       const selectedNodes = this.$refs.tree.getCheckedNodes();
-      console.log(selectedNodes);
+      console.log(selectedNodes)
     },
-    handleCheckChange(node, isChecked) {
-      console.log(node.id, node.parentId, (node.parentId && isChecked))
-      if (node.parentId && isChecked) {
-        this.isTreeWalkingUp = true;
-        this.setParentNodeChecked(node.parentId, isChecked);
-      } 
-      if (node.children && !this.isTreeWalkingUp)
-        this.setChildNodeChecked(node, isChecked);
-    },
-    setChildNodeChecked(node, isChecked) {
-      console.log('setChildNodeChecked', node.id)
-      for (const child of node.children) {
-        this.$refs.tree.setChecked(child, isChecked);
-      //  if (child.children) this.setChildNodeChecked(child, isChecked);
+    handleCheckChange (node, checked) {
+      let parent;
+      let deviceId;
+      parent = node.id.split("-");
+      deviceId = parent[0] + "-" + parent[1];
+      let checkedManage = checked;
+      if (node.children && this.in === false) {
+        this.setChildNodeChecked(node, checkedManage);
       }
+      if (checkedManage === true) {
+        this.in = true;
+        if (parent[1]) {
+          this.setParentNodeChecked(deviceId, checkedManage);
+        }
+        return this.$refs.tree.setChecked(parent[0], checkedManage);
+      } else {
+        this.setChildNodeChecked(node, checkedManage);
+      }
+      this.in = false;
     },
-    setParentNodeChecked(id, isChecked) {
-      console.log('setParentNodeChecked', id)
-      this.$refs.tree.setChecked(id, isChecked);
+   setParentNodeChecked(deviceId, checkedManage) {
+      this.in = true;
+      this.$refs.tree.setChecked(deviceId, checkedManage);
+    },
+    setChildNodeChecked(node, checkedManage) {
+      if (!node.children) return;
+      for (const child of node.children) {
+        this.$refs.tree.setChecked(child.id, checkedManage);
+        if (child.children) {
+          this.setChildNodeChecked(child, checkedManage);
+        }
+      }
     }
   },
-  beforeMount() {
-    this.getManageList();
+
+  beforeMount () {
+    this.getManageList()
   }
-};
+}
 </script>
 
 <style scoped>
