@@ -12,6 +12,8 @@ export default {
   data() {
     return {
       isTreeWalkingUp: false,
+      initLevel: 0,
+      currentLevel:0,
       manageData: [],
       projectData: [
         {
@@ -31,7 +33,7 @@ export default {
                 {
                   deviceId: "deviceId2",
                   deviceName: "deviceName2",
-                  canRead: false
+                  canRead: true
                 }
               ]
             },
@@ -151,23 +153,38 @@ export default {
       console.log(selectedNodes);
     },
     handleCheckChange(node, isChecked) {
-      console.log(node.id, node.parentId, (node.parentId && isChecked))
-      if (node.parentId && isChecked) {
-        this.isTreeWalkingUp = true;
-        this.setParentNodeChecked(node.parentId, isChecked);
-      } 
-      if (node.children && !this.isTreeWalkingUp)
-        this.setChildNodeChecked(node, isChecked);
+      console.log('node',node.id, 'isChecked', isChecked, 'initLevel', this.initLevel, 'currentLevel', this.currentLevel);
+      var idPath = node.id.split("-");
+      var level = idPath.length;     
+      if (isChecked) {
+        if (this.initLevel === 0) this.initLevel = level;
+        switch (level) {
+          case 1:
+            // if (node.children) this.setChildNodeChecked(node, isChecked, level);
+            if (this.initLevel === 1 && node.children)
+              this.setChildNodeChecked(node, isChecked);
+            break;
+          case 2:
+            this.setParentNodeChecked(idPath[0], isChecked);
+             if (this.initLevel === 2 && node.children)
+              this.setChildNodeChecked(node, isChecked);
+            break;
+          case 3:
+            this.setParentNodeChecked(idPath[0] + "-" + idPath[1], isChecked);
+        }      
+      
+      } else {
+        if (node.children) this.setChildNodeChecked(node, isChecked);
+        this.initLevel = 0;
+      }
     },
     setChildNodeChecked(node, isChecked) {
-      console.log('setChildNodeChecked', node.id)
       for (const child of node.children) {
         this.$refs.tree.setChecked(child, isChecked);
-      //  if (child.children) this.setChildNodeChecked(child, isChecked);
+        if (child.children) this.setChildNodeChecked(child, isChecked);        
       }
     },
     setParentNodeChecked(id, isChecked) {
-      console.log('setParentNodeChecked', id)
       this.$refs.tree.setChecked(id, isChecked);
     }
   },
