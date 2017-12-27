@@ -13,7 +13,7 @@ export default {
     return {
       isTreeWalkingUp: false,
       initLevel: 0,
-      currentLevel:0,
+      currentLevel: 0,
       manageData: [],
       projectData: [
         {
@@ -131,14 +131,14 @@ export default {
         for (let s of p.scada) {
           let itemLevel2 = {};
           itemLevel2.parentId = itemLevel1.id;
-          itemLevel2.id = itemLevel1.id + "-" + s.scadaId;
+          itemLevel2.id = itemLevel1.id + "#" + s.scadaId;
           if (s.canRead) self.defaultSelectedId.push(itemLevel2.id);
           itemLevel2.label = s.scadaId;
           itemLevel2.children = [];
           for (let d of s.device) {
             let itemLevel3 = {};
             itemLevel3.parentId = itemLevel2.id;
-            itemLevel3.id = itemLevel2.id + "-" + d.deviceId;
+            itemLevel3.id = itemLevel2.id + "#" + d.deviceId;
             if (d.canRead) self.defaultSelectedId.push(itemLevel3.id);
             itemLevel3.label = d.deviceId;
             itemLevel2.children.push(itemLevel3);
@@ -153,35 +153,42 @@ export default {
       console.log(selectedNodes);
     },
     handleCheckChange(node, isChecked) {
-      console.log('node',node.id, 'isChecked', isChecked, 'initLevel', this.initLevel, 'currentLevel', this.currentLevel);
-      var idPath = node.id.split("-");
-      var level = idPath.length;     
+      const self = this;
+      console.log(
+        "node",
+        node.id,
+        "isChecked",
+        isChecked,
+        "initLevel",
+        this.initLevel
+      );
+      var idPath = node.id.split("#");
+      var level = idPath.length;
       if (isChecked) {
         if (this.initLevel === 0) this.initLevel = level;
         switch (level) {
-          case 1:
-            // if (node.children) this.setChildNodeChecked(node, isChecked, level);
-            if (this.initLevel === 1 && node.children)
-              this.setChildNodeChecked(node, isChecked);
+          case 3: //device
+            this.setParentNodeChecked(idPath[0] + "#" + idPath[1], isChecked);
             break;
-          case 2:
+          case 2: //scada
             this.setParentNodeChecked(idPath[0], isChecked);
-             if (this.initLevel === 2 && node.children)
+          case 1: //project
+            if (this.initLevel === level && node.children) {  
               this.setChildNodeChecked(node, isChecked);
-            break;
-          case 3:
-            this.setParentNodeChecked(idPath[0] + "-" + idPath[1], isChecked);
-        }      
-      
+            }          
+        }
       } else {
         if (node.children) this.setChildNodeChecked(node, isChecked);
-        this.initLevel = 0;
+        this.initLevel = 0; //reset
       }
+      setTimeout(function(){
+        self.initLevel=0        
+        }, 100) //reset
     },
     setChildNodeChecked(node, isChecked) {
       for (const child of node.children) {
         this.$refs.tree.setChecked(child, isChecked);
-        if (child.children) this.setChildNodeChecked(child, isChecked);        
+        if (child.children) this.setChildNodeChecked(child, isChecked);
       }
     },
     setParentNodeChecked(id, isChecked) {
