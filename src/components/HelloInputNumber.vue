@@ -24,9 +24,8 @@ export default {
   watch: {
     'obj.num1': {
       immediate:true,
-      handler(value){
-        console.log(value);
-        this.obj.num1 = Math.round(value,0);     
+      handler(value){    
+        this.obj.num1 = Math.ceil(value);  
       }      
     }
   }
