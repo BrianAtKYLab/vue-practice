@@ -1,7 +1,7 @@
 <template>
   <div class='hello'>
     <h1>Hello Tree</h1>
-    <el-input-number v-model="num1">
+    <el-input-number v-model="obj.num1">
 
     </el-input-number>
   </div>
@@ -12,18 +12,21 @@ export default {
   name: "HelloInputNumber",
   data() {
     return {
-      num1:1
+      obj:{
+        num1:1,
+        num2:2
+      }
     };
   },
   methods: {
 
   },
   watch: {
-    num1:{
+    'obj.num1': {
       immediate:true,
       handler(value){
         console.log(value);
-        this.num1 = Math.round(value,0);
+        this.obj.num1 = Math.round(value,0);     
       }      
     }
   }
